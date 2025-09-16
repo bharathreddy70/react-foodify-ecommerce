@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import store from './store.js';
 import './Home.css';
 import "./stylesheets/global.css";   // ✅ correct path
-import Example from './Example.jsx';
+// import Example from './Example.jsx';
 import { BrowserRouter } from 'react-router-dom';
 
 

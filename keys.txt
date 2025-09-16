@@ -1,8 +1,0 @@
-public key : p37rBWkd44SPjdRet
-
-Template id: template_knhn41s
-
-service id: service_fq6pb7k
-
-
-email: reddy.bharathpadamati@gmail.com
