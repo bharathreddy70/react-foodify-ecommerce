@@ -348,14 +348,14 @@ const sendOrderEmail = () => {
                       </button>
                       <button
                         className="btn-cart minus"
-                        onClick={() => dispatch(reduceQty(item))}
+                        onClick={() => dispatch(reduceQty(item.id))}
                         disabled={item.quantity === 1}
                       >
                         -
                       </button>
                       <button
                         className="btn-cart remove"
-                        onClick={() => dispatch(removeFromCart(item))}
+                        onClick={() => dispatch(removeFromCart(item.id))}
                       >
                         ✕
                       </button>

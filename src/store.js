@@ -108,21 +108,25 @@ let cartSlice = createSlice({
       saveState("cart", state);
     },
     removeFromCart: (state, action) => {
-      let updated = state.filter((i) => i.id !== action.payload.id);
+      let updated = state.filter((i) => i.id !== action.payload);
       saveState("cart", updated);
       return updated;
     },
     increaseQty: (state, action) => {
+              
       let item = state.find((i) => i.id === action.payload);
       if (item) item.quantity += 1;
       saveState("cart", state);
     },
     reduceQty: (state, action) => {
-      let item = state.find((i) => i.id === action.payload.id);
+                    
+      let item = state.find((i) => i.id === action.payload);
+      
       let updated = state;
       if (item) {
+        
         if (item.quantity > 1) item.quantity -= 1;
-        else updated = state.filter((i) => i.id !== action.payload.id);
+        else updated = state.filter((i) => i.id !== action.payload);
       }
       saveState("cart", updated);
       return updated;
