@@ -1,7 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "./store";
+import {
+  loginUser,
+  logoutUser,
+  clearCart,
+  clearOrders,
+  setCart,
+  setOrders,
+} from "./store";
 import "../src/stylesheets/login.css";
 import { useEffect, useState } from "react";
 
@@ -22,33 +29,68 @@ function Login() {
     formState: { errors },
   } = useForm();
 
+  // 🔹 Handle Login
   const handleLogin = (data) => {
-    setLoginError("");       // reset error
-    setAttemptedLogin(true); // mark that user clicked login
-    dispatch(loginUser(data)); // perform login
+    setLoginError("");
+    setAttemptedLogin(true);
+    dispatch(loginUser(data));
   };
 
-  
-  useEffect(() => {
-    if (!attemptedLogin) return; // only check after button click
+  // 🔹 Handle Logout
+  const handleLogout = () => {
+    dispatch(clearCart());
+    dispatch(clearOrders());
+    dispatch(logoutUser());
+    navigate("/login");
+  };
 
-    if (isAuthenticated) {
+  // 🔑 After login success: load user cart & orders
+  useEffect(() => {
+    if (!attemptedLogin) return;
+
+    if (isAuthenticated && currentUsername) {
+      // Load user-specific data
+      const userCart =
+        JSON.parse(localStorage.getItem(`cart_${currentUsername}`)) || [];
+      const userOrders =
+        JSON.parse(localStorage.getItem(`orders_${currentUsername}`)) || [];
+
+      dispatch(setCart(userCart));
+      dispatch(setOrders(userOrders));
+
       alert(`✅ Login successful. Welcome ${currentUsername}!`);
-      navigate("/Orders");
+
+      // If login triggered during checkout → go to cart
+      if (localStorage.getItem("checkoutIntent") === "true") {
+        localStorage.removeItem("checkoutIntent");
+        navigate("/cart");
+      } else {
+        navigate("/");
+      }
     } else if (isAuthenticated === false) {
       setLoginError("❌ Invalid username or password");
     }
 
-    setAttemptedLogin(false); // reset for next attempt
-  }, [isAuthenticated, currentUsername, navigate, attemptedLogin]);
+    setAttemptedLogin(false);
+  }, [isAuthenticated, currentUsername, attemptedLogin, navigate, dispatch]);
 
+
+  // 🔹 Default: Login Form
   return (
     <div className="d-flex justify-content-center align-items-center min-vh-100 bg-gradient">
-      <div className="card shadow-lg p-4" style={{ width: "380px", borderRadius: "20px" }}>
+      <div
+        className="card shadow-lg p-4"
+        style={{ width: "380px", borderRadius: "20px" }}
+      >
         <div className="text-center mb-4">
           <div
             className="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center mx-auto"
-            style={{ width: "111px", height: "70px", fontSize: "28px", fontWeight: "bold" }}
+            style={{
+              width: "111px",
+              height: "70px",
+              fontSize: "28px",
+              fontWeight: "bold",
+            }}
           >
             <i>Foodify</i>
           </div>
@@ -64,7 +106,11 @@ function Login() {
               placeholder="Enter your username"
               {...register("username", { required: "Enter Username" })}
             />
-            {errors.username && <div className="text-danger mt-1 small">{errors.username.message}</div>}
+            {errors.username && (
+              <div className="text-danger mt-1 small">
+                {errors.username.message}
+              </div>
+            )}
           </div>
 
           <div className="mb-3">
@@ -75,10 +121,13 @@ function Login() {
               placeholder="Enter your password"
               {...register("password", { required: "Enter Password" })}
             />
-            {errors.password && <div className="text-danger mt-1 small">{errors.password.message}</div>}
+            {errors.password && (
+              <div className="text-danger mt-1 small">
+                {errors.password.message}
+              </div>
+            )}
           </div>
 
-          {/* Show loginError only when no validation errors */}
           {!errors.username && !errors.password && loginError && (
             <div className="text-danger text-center mb-3">{loginError}</div>
           )}

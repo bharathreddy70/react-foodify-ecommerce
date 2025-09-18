@@ -1,4 +1,3 @@
-
 import { useDispatch, useSelector } from "react-redux";
 import {
   addOrders,
@@ -6,6 +5,7 @@ import {
   clearCart,
   reduceQty,
   removeFromCart,
+  setCart,
 } from "./store";
 import "./stylesheets/cart.css";
 import {
@@ -16,13 +16,17 @@ import {
 import emailjs from "@emailjs/browser";
 import { useState, useEffect, useMemo } from "react";
 import QRCode from "react-qr-code";
-import { toast } from "react-toastify";
 import swal from "sweetalert2";
 import ReactDOM from "react-dom/client";
+import { useNavigate } from "react-router-dom";
 
 function Cart() {
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart);
+  const navigate = useNavigate();
+  const { isAuthenticated, currentUsername } = useSelector(
+    (state) => state.registerUser
+  );
 
   // Persistent Discount State
   const [discountPerc, setDiscountPerc] = useState(() => {
@@ -47,18 +51,10 @@ function Cart() {
         };
   });
 
-  // Persistent Payment Method
-  const [payment, setPayment] = useState(() => {
-    const saved = localStorage.getItem("paymentMethod");
-    return saved || "";
-  });
-
   const [customerEmail, setCustomerEmail] = useState("");
 
   // ✅ Total Price (via util + useMemo)
-  const totalPrice = useMemo(() => {
-    return calculateTotal(cartItems);
-  }, [cartItems]);
+  const totalPrice = useMemo(() => calculateTotal(cartItems), [cartItems]);
 
   const taxAmount = totalPrice * 0.18;
 
@@ -74,6 +70,22 @@ function Cart() {
 
   const payableAmount = (finalPrice + taxAmount + 50).toFixed(2);
 
+  // 🔹 Load user cart on mount
+  useEffect(() => {
+    if (isAuthenticated && currentUsername) {
+      const savedCart =
+        JSON.parse(localStorage.getItem(`cart_${currentUsername}`)) || [];
+      dispatch(setCart(savedCart));
+    }
+  }, [isAuthenticated, currentUsername, dispatch]);
+
+  // 🔹 Persist user cart whenever it changes
+  useEffect(() => {
+    if (isAuthenticated && currentUsername) {
+      localStorage.setItem(`cart_${currentUsername}`, JSON.stringify(cartItems));
+    }
+  }, [cartItems, isAuthenticated, currentUsername]);
+
   // Reset discounts/coupons when cart becomes empty
   useEffect(() => {
     if (cartItems.length === 0) {
@@ -84,11 +96,10 @@ function Cart() {
         couponDiscountPercentage: 0,
         couponDiscountAmount: 0,
       });
-      setPayment("");
     }
   }, [cartItems]);
 
-  // Sync states to localStorage
+  // Sync discount & coupon state globally (not tied to user)
   useEffect(() => {
     localStorage.setItem("discountPerc", JSON.stringify(discountPerc));
   }, [discountPerc]);
@@ -149,14 +160,13 @@ function Cart() {
       background: "linear-gradient(135deg, #ffffff, #d1f2eb)",
       confirmButtonColor: "#43a047",
       cancelButtonColor: "#888",
-      inputValidator: (value) => {
-        if (!value) return "Please select a payment method!";
-      },
+      inputValidator: (value) =>
+        !value ? "Please select a payment method!" : undefined,
     });
 
     if (!method) return;
 
-    // Step 2A: Handle QR Payment
+    // Step 2A: QR Payment
     if (method === "qr") {
       const result = await swal.fire({
         title: "📲 Scan & Pay",
@@ -185,15 +195,12 @@ function Cart() {
         cancelButtonColor: "#888",
       });
 
-      if (!result.isConfirmed) {
-        swal.fire("Payment Cancelled", "You are back in your cart", "info");
-        return;
-      }
+      if (!result.isConfirmed) return;
 
       sendOrderEmail();
     }
 
-    // Step 2B: Handle Card Payment
+    // Step 2B: Card Payment
     else if (method === "card") {
       const result = await swal.fire({
         title: "💳 Enter Card Details",
@@ -226,88 +233,115 @@ function Cart() {
         cancelButtonColor: "#888",
       });
 
-      if (!result.isConfirmed) {
-        swal.fire("Payment Cancelled", "You are back in your cart", "info");
-        return;
-      }
+      if (!result.isConfirmed) return;
 
       sendOrderEmail();
     }
   };
 
-  // 🔧 Email Sending
-  // 🔧 Email Sending
-const sendOrderEmail = () => {
-  const order_id = new Date().getTime();
+  // 🔧 Email Sending + Save Orders
+  const sendOrderEmail = () => {
+    const order_id = new Date().getTime();
 
-  const templateParams = {
-    order_id,
-    orders: cartItems.map((item) => ({
-      name: item.name,
-      price: (item.price * item.quantity).toFixed(2),
-      units: item.quantity,
-      image_url: item.imageUrl,
-    })),
-    cost: {
-      original: totalPrice.toFixed(2),
-      discount: discountPerc > 0 ? (totalPrice - discountedPrice).toFixed(2) : "0.00",
-      coupon: couponResult.isValidCoupon
-        ? couponResult.couponDiscountAmount.toFixed(2)
-        : "0.00",
-      tax: taxAmount.toFixed(2),
-      shipping: "50.00",
-      total: payableAmount,
-    },
-    email: customerEmail,
-  };
+    const templateParams = {
+      order_id,
+      orders: cartItems.map((item) => ({
+        name: item.name,
+        price: (item.price * item.quantity).toFixed(2),
+        units: item.quantity,
+        image_url: item.imageUrl,
+      })),
+      cost: {
+        original: totalPrice.toFixed(2),
+        discount:
+          discountPerc > 0
+            ? (totalPrice - discountedPrice).toFixed(2)
+            : "0.00",
+        coupon: couponResult.isValidCoupon
+          ? couponResult.couponDiscountAmount.toFixed(2)
+          : "0.00",
+        tax: taxAmount.toFixed(2),
+        shipping: "50.00",
+        total: payableAmount,
+      },
+      email: customerEmail,
+    };
 
-  emailjs
-    .send(
-      "service_uuus89i",
-      "template_knhn41s",
-      templateParams,
-      "p37rBWkd44SPjdRet"
-    )
-    .then(() => {
-      swal.fire({
-        title: "🎉 Payment Successful!",
-        text: "Confirmation email has been sent.",
-        icon: "success",
-        confirmButtonColor: "#43a047",
+    emailjs
+      .send(
+        "service_uuus89i",
+        "template_knhn41s",
+        templateParams,
+        "p37rBWkd44SPjdRet"
+      )
+      .then(() => {
+        swal.fire({
+          title: "🎉 Payment Successful!",
+          text: "Confirmation email has been sent.",
+          icon: "success",
+          confirmButtonColor: "#43a047",
+        });
+
+        const now = new Date();
+        const purchaseDetails = {
+          o_id: order_id,
+          date: now.toLocaleDateString(),
+          time: now.toLocaleTimeString(),
+          items: [...cartItems],
+          subTotal: totalPrice,
+          discountPerc,
+          couponAmount: couponResult.couponDiscountAmount,
+          tax: taxAmount.toFixed(2),
+          finalAmount: payableAmount,
+          totalPrice: payableAmount,
+          paymentMode: "online",
+        };
+
+        // 🔹 Save user orders
+        if (currentUsername) {
+          const userOrders =
+            JSON.parse(localStorage.getItem(`orders_${currentUsername}`)) || [];
+          const updated = [...userOrders, purchaseDetails];
+          localStorage.setItem(
+            `orders_${currentUsername}`,
+            JSON.stringify(updated)
+          );
+        }
+
+        dispatch(addOrders(purchaseDetails));
+        dispatch(clearCart());
+      })
+      .catch(() => {
+        swal.fire("❌ Failed", "Could not send confirmation email", "error");
       });
 
-      const now = new Date();
-      const purchaseDetails = {
-        o_id: order_id,
-        date: now.toLocaleDateString(),
-        time: now.toLocaleTimeString(),
-        items: [...cartItems],
-        subTotal: totalPrice,
-        discountPerc,
-        couponAmount: couponResult.couponDiscountAmount,
-        tax: taxAmount.toFixed(2),
-        finalAmount: payableAmount,
-        totalPrice: payableAmount,
-        paymentMode: "online",
-      };
-
-      dispatch(addOrders(purchaseDetails));
-      dispatch(clearCart());
-    })
-    .catch(() => {
-      swal.fire("❌ Failed", "Could not send confirmation email", "error");
+    setDiscountPerc(0);
+    setCouponCode("");
+    setCouponResult({
+      isValidCoupon: false,
+      couponDiscountPercentage: 0,
+      couponDiscountAmount: 0,
     });
+  };
 
-  setDiscountPerc(0);
-  setCouponCode("");
-  setCouponResult({
-    isValidCoupon: false,
-    couponDiscountPercentage: 0,
-    couponDiscountAmount: 0,
-  });
-  setPayment("");
-};
+  // 🔒 Protect Cart Route
+  // 🔹 Redirect if not logged in
+    useEffect(() => {
+      const protectedRoutes = ["/cart", "/orders"];
+  
+      if (!isAuthenticated && protectedRoutes.includes(location.pathname)) {
+        swal.fire({
+          icon: "warning",
+          title: "🔒 Login Required",
+          text: "You must log in to view this page.",
+          confirmButtonColor: "#1e88e5",
+        }).then(() => {
+          navigate("/login");
+        });
+      }
+    }, [isAuthenticated, location, navigate]);
 
+  // if (!isAuthenticated) return null;
 
   return (
     <>
@@ -372,13 +406,11 @@ const sendOrderEmail = () => {
           <aside className="cart-summary-block">
             <h3 className="summary-title">Order Summary</h3>
             <div className="cart-total">
-              {/* Original Price */}
               <div className="summary-row">
                 <span>Original</span>
                 <strong>₹{totalPrice.toFixed(2)}</strong>
               </div>
 
-              {/* Discount */}
               {discountPerc > 0 ? (
                 <div className="summary-row discount-applied">
                   <span>Discount ({discountPerc}%)</span>
@@ -391,11 +423,14 @@ const sendOrderEmail = () => {
                 </div>
               )}
 
-              {/* Coupon */}
               {couponResult.isValidCoupon ? (
                 <div className="summary-row">
-                  <span>Coupon ({couponResult.couponDiscountPercentage}%)</span>
-                  <strong>- ₹{couponResult.couponDiscountAmount.toFixed(2)}</strong>
+                  <span>
+                    Coupon ({couponResult.couponDiscountPercentage}%)
+                  </span>
+                  <strong>
+                    - ₹{couponResult.couponDiscountAmount.toFixed(2)}
+                  </strong>
                 </div>
               ) : (
                 <div className="summary-row">
@@ -404,7 +439,6 @@ const sendOrderEmail = () => {
                 </div>
               )}
 
-              {/* Tax & Shipping */}
               <div className="summary-row">
                 <span>Tax (18% GST)</span>
                 <strong>₹{taxAmount.toFixed(2)}</strong>
@@ -414,14 +448,12 @@ const sendOrderEmail = () => {
                 <strong>₹50.00</strong>
               </div>
 
-              {/* Final Total */}
               <div className="final-price">
                 <span>Total</span>
                 <span>₹{payableAmount}</span>
               </div>
             </div>
 
-            {/* Discount Buttons */}
             <div className="discount-buttons">
               {[10, 20, 30].map((perc) => (
                 <button key={perc} onClick={() => setDiscountPerc(perc)}>
@@ -433,7 +465,6 @@ const sendOrderEmail = () => {
               )}
             </div>
 
-            {/* Coupon Input */}
             <div className="mt-3">
               <div className="input-group">
                 <input
@@ -455,9 +486,10 @@ const sendOrderEmail = () => {
               </div>
             </div>
 
-            {/* Email Input */}
             <div className="checkout-block">
-              <label className="checkout-label">Email for Order Confirmation:</label>
+              <label className="checkout-label">
+                Email for Order Confirmation:
+              </label>
               <input
                 type="email"
                 placeholder="Enter your email"

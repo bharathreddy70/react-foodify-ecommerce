@@ -11,6 +11,7 @@ function Veg() {
   const cartItems = useSelector((state) => state.cart);
   const dispatch = useDispatch();
 
+  //pagination....
   const itemsPerPage = 8;
   const totalPages = Math.ceil(vegItems.length / itemsPerPage);
 

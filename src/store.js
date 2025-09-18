@@ -99,40 +99,34 @@ let productsSlice = createSlice({
 // ------------------ CART SLICE ------------------
 let cartSlice = createSlice({
   name: "cart",
-  initialState: loadState("cart", []),
+  initialState: [], // will load per-user after login
   reducers: {
+    setCart: (state, action) => {
+      return action.payload; // load user’s saved cart
+    },
     addToCart: (state, action) => {
       let item = state.find((i) => i.id === action.payload.id);
       if (item) item.quantity += 1;
       else state.push({ ...action.payload, quantity: 1 });
-      saveState("cart", state);
+      return state;
     },
     removeFromCart: (state, action) => {
-      let updated = state.filter((i) => i.id !== action.payload);
-      saveState("cart", updated);
-      return updated;
+      return state.filter((i) => i.id !== action.payload);
     },
     increaseQty: (state, action) => {
-              
       let item = state.find((i) => i.id === action.payload);
       if (item) item.quantity += 1;
-      saveState("cart", state);
+      return state;
     },
     reduceQty: (state, action) => {
-                    
       let item = state.find((i) => i.id === action.payload);
-      
-      let updated = state;
       if (item) {
-        
         if (item.quantity > 1) item.quantity -= 1;
-        else updated = state.filter((i) => i.id !== action.payload);
+        else return state.filter((i) => i.id !== action.payload);
       }
-      saveState("cart", updated);
-      return updated;
+      return state;
     },
     clearCart: () => {
-      saveState("cart", []);
       return [];
     },
   },
@@ -141,49 +135,45 @@ let cartSlice = createSlice({
 // ------------------ ORDERS SLICE ------------------
 let orderSlice = createSlice({
   name: "orders",
-  initialState: loadState("orders", []),
+  initialState: [], // per-user
   reducers: {
+    setOrders: (state, action) => {
+      return action.payload;
+    },
     addOrders: (state, action) => {
-      const updated = [...state, action.payload];
-      saveState("orders", updated);
-      return updated;
+      return [...state, action.payload];
+    },
+    clearOrders: () => {
+      return [];
     },
   },
 });
 
-
+// ------------------ AUTH SLICE ------------------
 let registerSlice = createSlice({
   name: "registerUser",
   initialState: {
-    users: [],              // array of registered users
-    currentUsername: null,  // logged-in user's name
+    users: [],              // registered users
+    currentUsername: null,  // logged-in username
     isAuthenticated: false, // login status
   },
   reducers: {
-    // ------------------ REGISTER USER ------------------
     register: (state, action) => {
-      // action.payload should contain { username, password, name }
       state.users.push(action.payload);
     },
-
-    // ------------------ LOGIN USER ------------------
     loginUser: (state, action) => {
       const { username, password } = action.payload;
-      // find user with matching username and password
       const user = state.users.find(
         (u) => u.username === username && u.password === password
       );
-
       if (user) {
-        state.currentUsername = user.name; // store name for greeting
+        state.currentUsername = user.username; // 🔑 use username for keying data
         state.isAuthenticated = true;
       } else {
         state.currentUsername = null;
         state.isAuthenticated = false;
       }
     },
-
-    // ------------------ LOGOUT USER ------------------
     logoutUser: (state) => {
       state.isAuthenticated = false;
       state.currentUsername = null;
@@ -191,20 +181,24 @@ let registerSlice = createSlice({
   },
 });
 
-
-
-
-
 // ------------------ EXPORT ACTIONS ------------------
-export const { addToCart, removeFromCart, reduceQty, increaseQty, clearCart } =
-  cartSlice.actions;
-export const { addOrders } = orderSlice.actions;
-export const { register,loginUser,logoutUser } = registerSlice.actions;
+export const {
+  setCart,
+  addToCart,
+  removeFromCart,
+  reduceQty,
+  increaseQty,
+  clearCart,
+} = cartSlice.actions;
+
+export const { setOrders, addOrders, clearOrders } = orderSlice.actions;
+
+export const { register, loginUser, logoutUser } = registerSlice.actions;
 
 // ------------------ STORE ------------------
 let store = configureStore({
   reducer: {
-    products: productsSlice.reducer,
+    products:productsSlice.reducer,
     cart: cartSlice.reducer,
     orders: orderSlice.reducer,
     registerUser: registerSlice.reducer,
