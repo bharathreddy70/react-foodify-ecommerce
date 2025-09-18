@@ -49,7 +49,6 @@ function Login() {
     if (!attemptedLogin) return;
 
     if (isAuthenticated && currentUsername) {
-      // Load user-specific data
       const userCart =
         JSON.parse(localStorage.getItem(`cart_${currentUsername}`)) || [];
       const userOrders =
@@ -58,7 +57,7 @@ function Login() {
       dispatch(setCart(userCart));
       dispatch(setOrders(userOrders));
 
-      alert(`✅ Login successful. Welcome ${currentUsername}!`);
+      alert(`✅ Welcome back, ${currentUsername}!`);
 
       // If login triggered during checkout → go to cart
       if (localStorage.getItem("checkoutIntent") === "true") {
@@ -74,8 +73,6 @@ function Login() {
     setAttemptedLogin(false);
   }, [isAuthenticated, currentUsername, attemptedLogin, navigate, dispatch]);
 
-
-  // 🔹 Default: Login Form
   return (
     <div className="d-flex justify-content-center align-items-center min-vh-100 bg-gradient">
       <div
@@ -94,7 +91,7 @@ function Login() {
           >
             <i>Foodify</i>
           </div>
-          <h3 className="mt-3 fw-bold text-dark">Foodify Login</h3>
+          <h3 className="mt-3 fw-bold text-dark">Login</h3>
         </div>
 
         <form onSubmit={handleSubmit(handleLogin)}>
@@ -148,6 +145,18 @@ function Login() {
             Sign Up
           </Link>
         </p>
+
+        {isAuthenticated && (
+          <div className="text-center mt-4">
+            <p className="text-dark">Logged in as {currentUsername}</p>
+            <button
+              onClick={handleLogout}
+              className="btn btn-danger btn-sm rounded-pill shadow-sm"
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

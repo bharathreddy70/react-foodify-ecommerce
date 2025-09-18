@@ -96,56 +96,48 @@ let productsSlice = createSlice({
   reducers: {},
 });
 
+
 // ------------------ CART SLICE ------------------
 let cartSlice = createSlice({
   name: "cart",
-  initialState: [], // will load per-user after login
+  initialState: [],
   reducers: {
-    setCart: (state, action) => {
-      return action.payload; // load user’s saved cart
-    },
+    setCart: (state, action) => action.payload,
     addToCart: (state, action) => {
       let item = state.find((i) => i.id === action.payload.id);
-      if (item) item.quantity += 1;
-      else state.push({ ...action.payload, quantity: 1 });
-      return state;
+      if (item) {
+        item.quantity += 1;
+      } else {
+        state.push({ ...action.payload, quantity: 1 });
+      }
     },
-    removeFromCart: (state, action) => {
-      return state.filter((i) => i.id !== action.payload);
-    },
+    removeFromCart: (state, action) => state.filter((i) => i.id !== action.payload),
     increaseQty: (state, action) => {
       let item = state.find((i) => i.id === action.payload);
       if (item) item.quantity += 1;
-      return state;
     },
     reduceQty: (state, action) => {
       let item = state.find((i) => i.id === action.payload);
       if (item) {
-        if (item.quantity > 1) item.quantity -= 1;
-        else return state.filter((i) => i.id !== action.payload);
+        if (item.quantity > 1) {
+          item.quantity -= 1;
+        } else {
+          return state.filter((i) => i.id !== action.payload);
+        }
       }
-      return state;
     },
-    clearCart: () => {
-      return [];
-    },
+    clearCart: () => [],
   },
 });
 
 // ------------------ ORDERS SLICE ------------------
 let orderSlice = createSlice({
   name: "orders",
-  initialState: [], // per-user
+  initialState: [],
   reducers: {
-    setOrders: (state, action) => {
-      return action.payload;
-    },
-    addOrders: (state, action) => {
-      return [...state, action.payload];
-    },
-    clearOrders: () => {
-      return [];
-    },
+    setOrders: (state, action) => action.payload,
+    addOrders: (state, action) => [...state, action.payload],
+    clearOrders: () => [],
   },
 });
 
@@ -153,13 +145,14 @@ let orderSlice = createSlice({
 let registerSlice = createSlice({
   name: "registerUser",
   initialState: {
-    users: [],              // registered users
-    currentUsername: null,  // logged-in username
-    isAuthenticated: false, // login status
+    users: loadState("users", []), // registered users persisted
+    currentUsername: loadState("authUser", null), // restore last logged user
+    isAuthenticated: !!loadState("authUser", null),
   },
   reducers: {
     register: (state, action) => {
       state.users.push(action.payload);
+      saveState("users", state.users);
     },
     loginUser: (state, action) => {
       const { username, password } = action.payload;
@@ -167,8 +160,9 @@ let registerSlice = createSlice({
         (u) => u.username === username && u.password === password
       );
       if (user) {
-        state.currentUsername = user.username; // 🔑 use username for keying data
+        state.currentUsername = user.username;
         state.isAuthenticated = true;
+        saveState("authUser", user.username);
       } else {
         state.currentUsername = null;
         state.isAuthenticated = false;
@@ -177,9 +171,11 @@ let registerSlice = createSlice({
     logoutUser: (state) => {
       state.isAuthenticated = false;
       state.currentUsername = null;
+      localStorage.removeItem("authUser");
     },
   },
 });
+
 
 // ------------------ EXPORT ACTIONS ------------------
 export const {

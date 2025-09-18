@@ -1,18 +1,21 @@
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { setOrders, clearOrders } from "./store";
 import "./stylesheets/orders.css";
 
 function Orders() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+
   const { isAuthenticated, currentUsername } = useSelector(
     (state) => state.registerUser
   );
+  const orders = useSelector((state) => state.orders);
 
-  const [userOrders, setUserOrders] = useState([]);
-
-  // 🔹 Redirect if not logged in
+  // 🔒 Protect route
   useEffect(() => {
     const protectedRoutes = ["/cart", "/orders"];
 
@@ -33,13 +36,15 @@ function Orders() {
     if (isAuthenticated && currentUsername) {
       const savedOrders =
         JSON.parse(localStorage.getItem(`orders_${currentUsername}`)) || [];
-      setUserOrders(savedOrders);
+      dispatch(setOrders(savedOrders));
+    } else {
+      dispatch(clearOrders()); // reset when logged out
     }
-  }, [isAuthenticated, currentUsername]);
+  }, [isAuthenticated, currentUsername, dispatch]);
 
   if (!isAuthenticated) return null;
 
-  if (userOrders.length === 0) {
+  if (orders.length === 0) {
     return <p className="no-orders">No orders yet 🛒</p>;
   }
 
@@ -83,7 +88,7 @@ function Orders() {
 
   return (
     <div className="orders-container">
-      {userOrders.map((order, index) => (
+      {orders.map((order, index) => (
         <div
           key={index}
           className="order-card clickable"

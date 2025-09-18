@@ -70,21 +70,24 @@ function Cart() {
 
   const payableAmount = (finalPrice + taxAmount + 50).toFixed(2);
 
-  // 🔹 Load user cart on mount
-  useEffect(() => {
-    if (isAuthenticated && currentUsername) {
-      const savedCart =
-        JSON.parse(localStorage.getItem(`cart_${currentUsername}`)) || [];
-      dispatch(setCart(savedCart));
-    }
-  }, [isAuthenticated, currentUsername, dispatch]);
-
+      useEffect(() => {
+        if (isAuthenticated && currentUsername) {
+          const savedCart =
+            JSON.parse(localStorage.getItem(`cart_${currentUsername}`)) || [];
+          dispatch(setCart(savedCart));
+        } else {
+          dispatch(clearCart()); // 🔑 ensure empty when logged out
+        }
+      }, [isAuthenticated, currentUsername, dispatch]);
+      
   // 🔹 Persist user cart whenever it changes
-  useEffect(() => {
-    if (isAuthenticated && currentUsername) {
-      localStorage.setItem(`cart_${currentUsername}`, JSON.stringify(cartItems));
-    }
-  }, [cartItems, isAuthenticated, currentUsername]);
+useEffect(() => {
+  if (isAuthenticated && currentUsername) {
+    localStorage.setItem(`cart_${currentUsername}`, JSON.stringify(cartItems));
+  }
+}, [cartItems, isAuthenticated, currentUsername]);
+
+
 
   // Reset discounts/coupons when cart becomes empty
   useEffect(() => {
@@ -324,26 +327,34 @@ function Cart() {
     });
   };
 
+
+  
+
   // 🔒 Protect Cart Route
   // 🔹 Redirect if not logged in
   const location = useLocation();
-    useEffect(() => {
-      const protectedRoutes = ["/cart", "/orders"];
+
+
   
-      if (!isAuthenticated && protectedRoutes.includes(location.pathname)) {
-        swal.fire({
+  // 🔒 Protect Cart Route
+  useEffect(() => {
+    const protectedRoutes = ["/cart", "/orders"];
+    if (!isAuthenticated && protectedRoutes.includes(location.pathname)) {
+      swal
+        .fire({
           icon: "warning",
           title: "🔒 Login Required",
           text: "You must log in to view this page.",
           confirmButtonColor: "#1e88e5",
-        }).then(() => {
+        })
+        .then(() => {
+          localStorage.setItem("checkoutIntent", "true"); // 👈 so after login we return to cart
           navigate("/login");
         });
-      }
-    }, [isAuthenticated, location, navigate]);
+    }
+  }, [isAuthenticated, location, navigate]);
 
-  // if (!isAuthenticated) return null;
-
+  if (!isAuthenticated) return null;
   return (
     <>
       <section className="cart-section container-flex">

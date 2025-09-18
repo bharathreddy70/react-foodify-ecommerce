@@ -1,4 +1,4 @@
-echo "version: 1
+version: 1
 frontend:
   phases:
     preBuild:
@@ -11,9 +11,16 @@ frontend:
       commands:
         - npm run build
   artifacts:
+    # ⚡ If you're using CRA (create-react-app), keep build/
+    # If you're using Vite, dist/ is correct.
     baseDirectory: dist
     files:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*" > amplify.yml
+      - node_modules/**/*
+  customRules:
+    # ✅ Fix React Router refresh 404 issue
+    - source: "</*>"
+      target: "/index.html"
+      status: "200"
