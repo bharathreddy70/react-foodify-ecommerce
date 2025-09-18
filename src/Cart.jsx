@@ -18,7 +18,7 @@ import { useState, useEffect, useMemo } from "react";
 import QRCode from "react-qr-code";
 import swal from "sweetalert2";
 import ReactDOM from "react-dom/client";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function Cart() {
   const dispatch = useDispatch();
@@ -326,6 +326,7 @@ function Cart() {
 
   // 🔒 Protect Cart Route
   // 🔹 Redirect if not logged in
+  const location = useLocation();
     useEffect(() => {
       const protectedRoutes = ["/cart", "/orders"];
   
