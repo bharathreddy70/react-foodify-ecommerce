@@ -1,62 +1,41 @@
-import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  loginUser,
-  logoutUser,
-  clearCart,
-  clearOrders,
-  setCart,
-  setOrders,
-} from "./store";
-import "../src/stylesheets/login.css";
+import { loginUser } from "./store";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import "./stylesheets/login.css";
 
 function Login() {
-  const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const { isAuthenticated, currentUsername } = useSelector(
+  const { isAuthenticated, currentUsername, users } = useSelector(
     (state) => state.registerUser
   );
 
-  const [loginError, setLoginError] = useState("");
   const [attemptedLogin, setAttemptedLogin] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+  const onSubmit = (data) => {
+    const { username, password } = data;
+    const user = users.find(
+      (u) => u.username === username && u.password === password
+    );
 
-  // 🔹 Handle Login
-  const handleLogin = (data) => {
-    setLoginError("");
-    setAttemptedLogin(true);
-    dispatch(loginUser(data));
+    if (user) {
+      dispatch(loginUser({ username }));
+      setLoginError("");
+      setAttemptedLogin(true);
+    } else {
+      setLoginError("❌ Invalid username or password");
+    }
   };
 
-  // 🔹 Handle Logout
-  const handleLogout = () => {
-    dispatch(clearCart());
-    dispatch(clearOrders());
-    dispatch(logoutUser());
-    navigate("/login");
-  };
-
-  // 🔑 After login success: load user cart & orders
   useEffect(() => {
     if (!attemptedLogin) return;
 
     if (isAuthenticated && currentUsername) {
-      const userCart =
-        JSON.parse(localStorage.getItem(`cart_${currentUsername}`)) || [];
-      const userOrders =
-        JSON.parse(localStorage.getItem(`orders_${currentUsername}`)) || [];
-
-      dispatch(setCart(userCart));
-      dispatch(setOrders(userOrders));
-
       alert(`✅ Welcome back, ${currentUsername}!`);
 
       // If login triggered during checkout → go to cart
@@ -66,12 +45,10 @@ function Login() {
       } else {
         navigate("/");
       }
-    } else if (isAuthenticated === false) {
-      setLoginError("❌ Invalid username or password");
     }
 
     setAttemptedLogin(false);
-  }, [isAuthenticated, currentUsername, attemptedLogin, navigate, dispatch]);
+  }, [isAuthenticated, currentUsername, attemptedLogin, navigate]);
 
   return (
     <div className="d-flex justify-content-center align-items-center min-vh-100 bg-gradient">
@@ -94,7 +71,7 @@ function Login() {
           <h3 className="mt-3 fw-bold text-dark">Login</h3>
         </div>
 
-        <form onSubmit={handleSubmit(handleLogin)}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-3">
             <label className="form-label fw-semibold">Username</label>
             <input
@@ -104,9 +81,7 @@ function Login() {
               {...register("username", { required: "Enter Username" })}
             />
             {errors.username && (
-              <div className="text-danger mt-1 small">
-                {errors.username.message}
-              </div>
+              <div className="text-danger mt-1 small">{errors.username.message}</div>
             )}
           </div>
 
@@ -119,9 +94,7 @@ function Login() {
               {...register("password", { required: "Enter Password" })}
             />
             {errors.password && (
-              <div className="text-danger mt-1 small">
-                {errors.password.message}
-              </div>
+              <div className="text-danger mt-1 small">{errors.password.message}</div>
             )}
           </div>
 
@@ -141,22 +114,10 @@ function Login() {
 
         <p className="text-center text-muted mt-4 mb-0">
           Don’t have an account?{" "}
-          <Link to="/signup" className="fw-semibold text-primary">
+          <a href="/signup" className="fw-semibold text-primary">
             Sign Up
-          </Link>
+          </a>
         </p>
-
-        {isAuthenticated && (
-          <div className="text-center mt-4">
-            <p className="text-dark">Logged in as {currentUsername}</p>
-            <button
-              onClick={handleLogout}
-              className="btn btn-danger btn-sm rounded-pill shadow-sm"
-            >
-              Logout
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

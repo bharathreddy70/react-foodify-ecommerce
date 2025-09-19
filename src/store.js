@@ -96,108 +96,155 @@ let productsSlice = createSlice({
   reducers: {},
 });
 
-
-// ------------------ CART SLICE ------------------
-let cartSlice = createSlice({
-  name: "cart",
-  initialState: [],
-  reducers: {
-    setCart: (state, action) => action.payload,
-    addToCart: (state, action) => {
-      let item = state.find((i) => i.id === action.payload.id);
-      if (item) {
-        item.quantity += 1;
-      } else {
-        state.push({ ...action.payload, quantity: 1 });
-      }
-    },
-    removeFromCart: (state, action) => state.filter((i) => i.id !== action.payload),
-    increaseQty: (state, action) => {
-      let item = state.find((i) => i.id === action.payload);
-      if (item) item.quantity += 1;
-    },
-    reduceQty: (state, action) => {
-      let item = state.find((i) => i.id === action.payload);
-      if (item) {
-        if (item.quantity > 1) {
-          item.quantity -= 1;
-        } else {
-          return state.filter((i) => i.id !== action.payload);
-        }
-      }
-    },
-    clearCart: () => [],
-  },
-});
-
-// ------------------ ORDERS SLICE ------------------
-let orderSlice = createSlice({
-  name: "orders",
-  initialState: [],
-  reducers: {
-    setOrders: (state, action) => action.payload,
-    addOrders: (state, action) => [...state, action.payload],
-    clearOrders: () => [],
-  },
-});
-
-// ------------------ AUTH SLICE ------------------
-let registerSlice = createSlice({
+/* ------------------ User Slice ------------------ */
+const registerUserSlice = createSlice({
   name: "registerUser",
   initialState: {
-    users: loadState("users", []), // registered users persisted
-    currentUsername: loadState("authUser", null), // restore last logged user
-    isAuthenticated: !!loadState("authUser", null),
+    isAuthenticated: !!localStorage.getItem("authUser"),
+    currentUsername: localStorage.getItem("authUser") || null,
+    users: JSON.parse(localStorage.getItem("users")) || [], // optional if you keep registered users
   },
   reducers: {
-    register: (state, action) => {
-      state.users.push(action.payload);
-      saveState("users", state.users);
-    },
     loginUser: (state, action) => {
-      const { username, password } = action.payload;
-      const user = state.users.find(
-        (u) => u.username === username && u.password === password
-      );
-      if (user) {
-        state.currentUsername = user.username;
-        state.isAuthenticated = true;
-        saveState("authUser", user.username);
-      } else {
-        state.currentUsername = null;
-        state.isAuthenticated = false;
-      }
+      const { username } = action.payload;
+      state.isAuthenticated = true;
+      state.currentUsername = username;
+      localStorage.setItem("authUser", username);
     },
     logoutUser: (state) => {
       state.isAuthenticated = false;
       state.currentUsername = null;
       localStorage.removeItem("authUser");
     },
+    registerNewUser: (state, action) => {
+      const newUser = action.payload;
+      state.users.push(newUser);
+      localStorage.setItem("users", JSON.stringify(state.users));
+    },
   },
 });
 
+/* ------------------ Cart Slice ------------------ */
+const getInitialCart = () => {
+  const username = localStorage.getItem("authUser");
+  if (username) {
+    return JSON.parse(localStorage.getItem(`cart_${username}`)) || [];
+  }
+  return [];
+};
 
-// ------------------ EXPORT ACTIONS ------------------
+const persistCart = (cart) => {
+  const username = localStorage.getItem("authUser");
+  if (username) {
+    localStorage.setItem(`cart_${username}`, JSON.stringify(cart));
+  }
+};
+
+const cartSlice = createSlice({
+  name: "cart",
+  initialState: getInitialCart(),
+  reducers: {
+    setCart: (state, action) => {
+      persistCart(action.payload);
+      return action.payload;
+    },
+    addToCart: (state, action) => {
+      const item = state.find((i) => i.id === action.payload.id);
+      if (item) {
+        item.quantity += 1;
+      } else {
+        state.push({ ...action.payload, quantity: 1 });
+      }
+      persistCart(state);
+    },
+    removeFromCart: (state, action) => {
+      const newState = state.filter((i) => i.id !== action.payload);
+      persistCart(newState);
+      return newState;
+    },
+    increaseQty: (state, action) => {
+      const item = state.find((i) => i.id === action.payload);
+      if (item) item.quantity += 1;
+      persistCart(state);
+    },
+    reduceQty: (state, action) => {
+      const item = state.find((i) => i.id === action.payload);
+      if (item) {
+        if (item.quantity > 1) {
+          item.quantity -= 1;
+        } else {
+          const newState = state.filter((i) => i.id !== action.payload);
+          persistCart(newState);
+          return newState;
+        }
+      }
+      persistCart(state);
+    },
+    clearCart: () => {
+      persistCart([]);
+      return [];
+    },
+  },
+});
+
+/* ------------------ Orders Slice ------------------ */
+const getInitialOrders = () => {
+  const username = localStorage.getItem("authUser");
+  if (username) {
+    return JSON.parse(localStorage.getItem(`orders_${username}`)) || [];
+  }
+  return [];
+};
+
+const persistOrders = (orders) => {
+  const username = localStorage.getItem("authUser");
+  if (username) {
+    localStorage.setItem(`orders_${username}`, JSON.stringify(orders));
+  }
+};
+
+const ordersSlice = createSlice({
+  name: "orders",
+  initialState: getInitialOrders(),
+  reducers: {
+    setOrders: (state, action) => {
+      persistOrders(action.payload);
+      return action.payload;
+    },
+    addOrder: (state, action) => {
+      const newState = [...state, action.payload];
+      persistOrders(newState);
+      return newState;
+    },
+    clearOrders: () => {
+      persistOrders([]);
+      return [];
+    },
+  },
+});
+
+/* ------------------ Exports ------------------ */
+export const { loginUser, logoutUser, registerNewUser } =
+  registerUserSlice.actions;
+
 export const {
   setCart,
   addToCart,
   removeFromCart,
-  reduceQty,
   increaseQty,
+  reduceQty,
   clearCart,
 } = cartSlice.actions;
 
-export const { setOrders, addOrders, clearOrders } = orderSlice.actions;
-
-export const { register, loginUser, logoutUser } = registerSlice.actions;
+export const { setOrders, addOrder, clearOrders } = ordersSlice.actions;
 
 // ------------------ STORE ------------------
 let store = configureStore({
   reducer: {
     products:productsSlice.reducer,
     cart: cartSlice.reducer,
-    orders: orderSlice.reducer,
-    registerUser: registerSlice.reducer,
+    orders: ordersSlice.reducer,
+    registerUser: registerUserSlice.reducer,
   },
 });
 

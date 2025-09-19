@@ -15,21 +15,7 @@ function Orders() {
   );
   const orders = useSelector((state) => state.orders);
 
-  // 🔒 Protect route
-  useEffect(() => {
-    const protectedRoutes = ["/cart", "/orders"];
-
-    if (!isAuthenticated && protectedRoutes.includes(location.pathname)) {
-      Swal.fire({
-        icon: "warning",
-        title: "🔒 Login Required",
-        text: "You must log in to view this page.",
-        confirmButtonColor: "#1e88e5",
-      }).then(() => {
-        navigate("/login");
-      });
-    }
-  }, [isAuthenticated, location, navigate]);
+  
 
   // 🔹 Load user-specific orders from localStorage
   useEffect(() => {
@@ -42,11 +28,15 @@ function Orders() {
     }
   }, [isAuthenticated, currentUsername, dispatch]);
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated) {
+  return <p className="no-orders">⚠️ Please login to view your orders</p>;
+}
 
-  if (orders.length === 0) {
-    return <p className="no-orders">No orders yet 🛒</p>;
-  }
+if (orders.length === 0) {
+  return <p className="no-orders">No orders yet 🛒</p>;
+}
+
+  
 
   const showOrderSummary = (order) => {
     const itemsHtml = order.items
@@ -86,6 +76,7 @@ function Orders() {
     });
   };
 
+  
   return (
     <div className="orders-container">
       {orders.map((order, index) => (
