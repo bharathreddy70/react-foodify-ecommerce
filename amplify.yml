@@ -11,16 +11,13 @@ frontend:
       commands:
         - npm run build
   artifacts:
-    # ⚡ If you're using CRA (create-react-app), keep build/
-    # If you're using Vite, dist/ is correct.
-    baseDirectory: dist
+    baseDirectory: dist   # ✅ Vite output folder
     files:
       - '**/*'
   cache:
     paths:
       - node_modules/**/*
   customRules:
-    # ✅ Fix React Router refresh 404 issue
     - source: "</*>"
       target: "/index.html"
       status: "200"
