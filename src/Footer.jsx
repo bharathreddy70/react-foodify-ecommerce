@@ -1,13 +1,12 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
-import "./stylesheets/global.css";
-
+import "./stylesheets/footer.css";
 
 function Footer() {
   return (
     <>
 
-      <footer className="container-fluid bg-dark text-light pt-5 pb-3 mt-5">
+      <footer className="container-fluid bg-dark footer text-light pt-5 pb-3 ">
   <div className="container-fluid">
     <div className="row text-center text-md-start">
       {/* Company Info */}
@@ -35,12 +34,19 @@ function Footer() {
         <h5 className="fw-bold">Contact Us</h5>
         <p>📍 123 Market Street, Hyderabad, India</p>
         <p>📧 support@Foodify.com</p>
-        <p>📞 +91 98765 43210</p>
-        <div>
-          <a href="#" className="text-light me-3">Facebook</a>
-          <a href="#" className="text-light me-3">Instagram</a>
-          <a href="#" className="text-light">Twitter</a>
+        <p>📞 +91 79811 02318</p>
+        <div className="d-flex gap-3">
+          <a href="#" className="text-light fs-4">
+            <i className="bi bi-facebook"></i>
+          </a>
+          <a href="#" className="text-light fs-4">
+            <i className="bi bi-instagram"></i>
+          </a>
+          <a href="#" className="text-light fs-4">
+            <i className="bi bi-twitter"></i>
+          </a>
         </div>
+
       </div>
 
       {/* Google Maps */}

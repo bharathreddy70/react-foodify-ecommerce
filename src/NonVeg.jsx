@@ -10,7 +10,7 @@ function NonVeg() {
   const cartItems = useSelector((state) => state.cart); // ✅ added
   const dispatch = useDispatch();
 
-  const itemsPerPage = 8;
+  const itemsPerPage = 6;
   const totalPages = Math.ceil(nonVegItems.length / itemsPerPage);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,16 +56,17 @@ function NonVeg() {
             const cartItem = getCartItem(product.id); // ✅ check cart
 
             return (
-              <div key={product.id} className="col-md-3 col-sm-6 mb-4">
-                <div className="card product-card h-100 shadow-sm">
+              <div key={product.id} className="col-md-2 col-sm-6 mb-4">
+                <div className="card product-card h-100 shadow-sm border">
                   <div className="img-container">
                     <img
                       src={product.imageUrl}
-                      className="card-img-top product-img"
+                      className="card-img-top product-img "
                       alt={product.name}
+                      // style={{width:"220px"}}
                     />
                   </div>
-                  <div className="card-body d-flex flex-column text-center">
+                  <div className="card-body d-flex flex-column text-center nonveg-card">
                     <h5 className="card-title">{product.name}</h5>
 
                     {/* ✅ Price */}
@@ -130,20 +131,24 @@ function NonVeg() {
           })}
         </div>
 
-        {/* Pagination Buttons */}
+      {/* Pagination Buttons */} 
         <div className="pagination-buttons text-center mt-4">
           <button
+            className="pagination-btn"
             onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            prev
-          </button>{" "}
-          {paginationButtons}{" "}
+            Prev
+          </button>
+
+          {paginationButtons}
+
           <button
+            className="pagination-btn"
             onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            next
+            Next
           </button>
         </div>
       </div>

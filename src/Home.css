@@ -8,46 +8,67 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
 
+
+}
+body{
+  background-color: rgba(254, 254, 6, 0.114);
+}
 .animate-fade-up {
   animation: fadeInUp 1s ease-out forwards;
 }
 
-/* Hero Banner Section */
-.hero-banner-section {
-  background-image: url('/Images/banner1.png'); 
-  background-size: cover; 
-  background-position: center; 
-  background-repeat: no-repeat; 
-  color: white; 
-  position: relative; 
+/* Best Sellers Horizontal Scroll */
+.bestsellers-wrapper {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  scroll-snap-type: x mandatory;
+  padding: 20px 10px;
 }
 
-.hero-banner-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4); /* Dark overlay for better text readability */
-  z-index: 1;
+.bestseller-card {
+  flex: 0 0 250px; /* width of each card */
+  scroll-snap-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
 }
 
-.hero-banner-section > * {
-  position: relative;
-  z-index: 2; 
+.bestseller-card:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.2);
 }
+
+/* Hide scrollbar */
+.bestsellers-wrapper::-webkit-scrollbar {
+  display: none;
+}
+.bestsellers-wrapper {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Center card automatically on scroll */
+.bestsellers-wrapper {
+  scroll-behavior: smooth;
+}
+
+
+
+
 
 /* Special Offer Section */
 .special-offer-section {
   background-image: url('/Images/chocolate_sale_banner.png');
+  height: 300px;
+  border-radius: 20px; 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   color: white;
   position: relative;
+
+  
   overflow: hidden;
 }
 
@@ -66,3 +87,109 @@
   position: relative;
   z-index: 2;
 }
+
+.testimonial-section {
+  width: 1495px;
+  border: 1px solid #ccdaf1;
+  margin-top: 0px !important;
+    background-color: #ffffff;
+ /* light gradient */
+  border-radius: 20px; /* rounded corners */
+  padding: 40px 20px; /* add some padding inside */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05); /* subtle shadow for depth */
+}
+
+.testimonial-section .section-title {
+  margin-bottom: 1rem; /* reduce from default 1.5rem */
+}
+
+
+.testimonial-card {
+  max-width: 600px;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+}
+
+.avatar {
+  font-size: 4rem; /* size of avatar */
+  color: #0d6efd; /* Bootstrap primary blue */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
+
+
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  filter: invert(0.3);
+  width: 40px;
+  height: 40px;
+}
+
+.text-warning i {
+  font-size: 1.2rem;
+}
+
+/* Existing styles remain unchanged */
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .testimonial-section {
+    width: 95%;
+    padding: 35px 15px;
+  }
+}
+
+@media (max-width: 992px) {
+  .testimonial-card {
+    max-width: 100%;
+    margin: 0 auto 20px;
+  }
+  .avatar {
+    font-size: 3.5rem;
+  }
+  .text-warning i {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .testimonial-section {
+    padding: 30px 10px;
+  }
+  .testimonial-card {
+    padding: 20px;
+  }
+  .avatar {
+    font-size: 3rem;
+  }
+  .testimonial-section .section-title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .testimonial-card p {
+    font-size: 0.9rem;
+  }
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    width: 30px;
+    height: 30px;
+  }
+  .avatar {
+    font-size: 2.5rem;
+  }
+}
+

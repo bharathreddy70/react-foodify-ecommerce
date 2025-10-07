@@ -1,0 +1,3 @@
+- [x] Refactor HeroCarousel.jsx for cleaner structure and better JSX practices
+- [x] Update HeroCarousel.css with modern, responsive styles including gradients, improved typography, and mobile breakpoints 
+- [x] Test the refactored component by running the app and checking the carousel display

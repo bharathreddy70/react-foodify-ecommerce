@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FaShoppingCart } from "react-icons/fa";
-import { addToCart, reduceQty, increaseQty } from "./store"; // ✅ include qty actions
+import { FaShoppingCart, FaStar } from "react-icons/fa";
+import { addToCart, reduceQty, increaseQty } from "./store";
 import "./stylesheets/drinksSection.css";
 import { Slide, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function Drinks() {
   const drinkItems = useSelector((state) => state.products.drinks);
-  const cartItems = useSelector((state) => state.cart); // ✅ get cart
+  const cartItems = useSelector((state) => state.cart);
   const dispatch = useDispatch();
 
-  const itemsPerPage = 8;
+  const itemsPerPage = 6;
   const totalPages = Math.ceil(drinkItems.length / itemsPerPage);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,7 +29,7 @@ function Drinks() {
     </button>
   ));
 
-  // ✅ helper to check if item already in cart
+  // ✅ helper to check if item is in cart
   const getCartItem = (id) => cartItems.find((item) => item.id === id);
 
   return (
@@ -52,14 +52,15 @@ function Drinks() {
 
       <div className="container drinks-section py-5">
         <h2 className="text-center mb-5 section-title">🥤 Refreshing Drinks</h2>
+
         <div className="row">
           {slicedItems.map((product) => {
             const cartItem = getCartItem(product.id);
 
             return (
-              <div key={product.id} className="col-md-3 col-sm-6 mb-4">
-                <div className="card product-card h-100 shadow-sm">
-                  {/* Image */}
+              <div key={product.id} className="col-md-2 col-sm-6 mb-4">
+                <div className="card product-card h-100 shadow-sm border">
+                  {/* Product Image */}
                   <div className="img-container">
                     <img
                       src={product.imageUrl}
@@ -68,15 +69,29 @@ function Drinks() {
                     />
                   </div>
 
-                  {/* Content */}
-                  <div className="card-body d-flex flex-column text-center">
+                  {/* Card Body */}
+                  <div className="card-body d-flex flex-column text-center drink-card">
                     <h5 className="card-title">{product.name}</h5>
+
+                    {/* Price */}
                     <p className="card-text text-muted">
-                      <span className="cart-price">₹ {product.price}</span>/
-                      {product.unit}
+                      <span className="cart-price">₹ {product.price}</span>/{product.unit}
                     </p>
 
-                    {/* ✅ Same as Veg.jsx — Add or Qty controls */}
+                    {/* ⭐ Star Ratings */}
+                    <div className="star-rating mb-2 d-flex justify-content-center">
+                      <span className="d-flex align-items-center">
+                        <small className="text-muted me-2">{product.rating}</small>
+                        {[...Array(5)].map((_, i) => (
+                          <FaStar
+                            key={i}
+                            color={i < Math.round(product.rating) ? "#ffc107" : "#e4e5e9"}
+                          />
+                        ))}
+                      </span>
+                    </div>
+
+                    {/* Add to Cart or Quantity Controls */}
                     {!cartItem ? (
                       <button
                         className="btn btn-drink mt-auto cart-btn"
@@ -102,7 +117,6 @@ function Drinks() {
 
                         <span className="fw-bold">{cartItem.quantity}</span>
 
-
                         <button
                           className="btn btn-outline-success"
                           onClick={() => {
@@ -124,17 +138,21 @@ function Drinks() {
         {/* Pagination Buttons */}
         <div className="pagination-buttons text-center mt-4">
           <button
+            className="pagination-btn"
             onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            prev
-          </button>{" "}
-          {paginationButtons}{" "}
+            Prev
+          </button>
+
+          {paginationButtons}
+
           <button
+            className="pagination-btn"
             onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            next
+            Next
           </button>
         </div>
       </div>

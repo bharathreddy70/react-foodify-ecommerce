@@ -1,0 +1,145 @@
+/* 🌟 Animated Background & Shapes */
+.animated-bg {
+  position: relative;
+  background: linear-gradient(135deg, #e0f7fa, #fce4ec);
+  border-radius: 20px;
+  padding: 60px 30px;
+  overflow: hidden;
+}
+
+/* Floating shapes (optional) */
+.float-shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.2;
+  animation: floatAnim 8s infinite ease-in-out;
+}
+
+/* Section Title */
+.contact-section {
+  position: relative;
+  background: linear-gradient(135deg, #e0f7fa, #ffe0b2);
+  border-radius: 20px;
+  overflow: hidden;
+  padding: 50px 20px;
+}
+
+.contact-section .section-title::after {
+  content: "";
+  width: 50%;
+  height: 4px;
+  background: #d81b60;
+  position: absolute;
+  left: 25%;
+  bottom: -10px;
+  border-radius: 2px;
+}
+
+/* Cards */
+.contact-card {
+  border-radius: 15px;
+  background: #ffffffcc; /* semi-transparent white */
+  backdrop-filter: blur(6px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* Submit Button */
+.submit-btn {
+  background: linear-gradient(135deg, #d81b60, #f06292);
+  border: none;
+  transition: transform 0.2s ease;
+}
+
+.submit-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #f06292, #d81b60);
+}
+
+/* Social icons animation */
+.social-icon {
+  transition: transform 0.3s ease;
+}
+
+.social-icon:hover {
+  transform: scale(1.3) rotate(10deg);
+}
+
+/* Floating bubbles */
+.float-bubble {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: floatAnim 8s infinite ease-in-out;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.float-bubble:hover {
+  transform: scale(1.2);
+  opacity: 0.4;
+}
+
+/* Pop animation with sprinkle effect */
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 1;
+  animation: popParticle 0.8s forwards;
+}
+
+/* Animations */
+@keyframes floatAnim {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-20px) translateX(10px); }
+}
+
+@keyframes popParticle {
+  0% { transform: translate(0,0) scale(1); opacity:1; }
+  100% { 
+    transform: translate(calc(-50px + 100px * random()), calc(-50px + 100px * random())) scale(0.5); 
+    opacity:0; 
+  }
+}
+
+/* 🌟 RESPONSIVE FIXES */
+@media (max-width: 992px) {
+  .contact-section {
+    padding: 40px 15px;
+  }
+  .contact-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-section .row {
+    flex-direction: column;
+  }
+  .contact-card {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .contact-section h2 {
+    font-size: 1.8rem;
+  }
+  .contact-section p {
+    font-size: 0.9rem;
+  }
+  .submit-btn {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+  .social-icon {
+    font-size: 1.5rem;
+  }
+}

@@ -1,0 +1,120 @@
+.hero-carousel {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow-x: hidden; /* horizontal scroll hidden */
+  display: flex;
+  justify-content: center; /* center the fixed-width slides */
+  align-items: center;
+}
+
+.hero-slide {
+    
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1470px; /* Fixed width */
+  height: 300px; /* Fixed height */
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  z-index: 2;
+}
+
+.hero-img {
+    border-radius: 13px;
+  width: 1470px; /* Force exact width */
+  height: 300px; /* Force exact height */
+  object-fit: cover; /* Fill the container without stretching */
+  display: block;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  text-align: center;
+  z-index: 3;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.hero-subtitle {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  font-size: 2rem;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center; /* centers the arrow symbol inside the button */
+   border: none;         /* remove border */
+  outline: none;        /* remove focus outline */
+  box-shadow: none; 
+}
+
+.carousel-arrow.prev {
+  left: 20px;
+}
+
+
+.carousel-arrow.next {
+  right: 20px;
+  
+}
+
+/* Responsive scaling for smaller screens */
+@media (max-width: 1600px) {
+   
+  .hero-slide,
+  .hero-img {
+    width: 100%;
+    max-width: 1470px;
+  }
+}
+
+@media (max-width: 768px) {
+    .hero-carousel{
+    margin-top: 112px;
+   }
+  .hero-title {
+    font-size: 1.8rem;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+  .carousel-arrow {
+    font-size: 1.5rem;
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.5rem;
+  }
+  .hero-subtitle {
+    font-size: 0.9rem;
+  }
+}

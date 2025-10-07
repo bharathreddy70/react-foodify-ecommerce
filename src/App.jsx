@@ -10,13 +10,14 @@ import Drinks from "./Drinks";
 import Chocolates from "./Chocolates";
 import Orders from "./Orders";
 import Cart from "./Cart";
-import AboutUs from "./AboutUs";
+// import AboutUs from "./AboutUs";
 import ContactUs from "./ContactUs";
 import NotFound from "./NotFound";
 import "./App.css";
 import Login from "./Login";
 import SignUp from "./SignUp";
-import { logoutUser } from "./store"; // ✅ import logout action
+import { clearCart, logoutUser } from "./store"; // ✅ import logout action
+import Footer from "./Footer";
 
 function App() {
   const dispatch = useDispatch();
@@ -32,8 +33,22 @@ function App() {
   );
 
   const handleLogout = () => {
-    dispatch(logoutUser()); // clear auth state
+    dispatch(clearCart());
+    dispatch(logoutUser());// clear auth state
     navigate("/login"); // go to login page
+  };
+
+   const handleContactClick = () => {
+    if (location.pathname === "/") {
+      // Already on home → just scroll
+      document.getElementById("contact-section")?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // Go to home first, then scroll after render
+      navigate("/");
+      setTimeout(() => {
+        document.getElementById("contact-section")?.scrollIntoView({ behavior: "smooth" });
+      }, 200); // small delay so Home has time to render
+    }
   };
 
   return (
@@ -79,7 +94,7 @@ function App() {
               </button>
             ) : (
               <Link className="nav-link text-light d-flex align-items-center gap-1" to="/login">
-                <FaUser className="text-white fs-5"/> <span className="text-white fs-6 +">Login</span>
+                <FaUser className="text-white fs-5"/> <span className="text-white fs-6">Login</span>
               </Link>
             )}
           </div>
@@ -92,13 +107,24 @@ function App() {
             <li className="nav-item mx-2"><Link className="nav-link text-white" to="/nonVeg">🍗 NonVeg</Link></li>
             <li className="nav-item mx-2"><Link className="nav-link text-white" to="/drinks">🍹 Drinks</Link></li>
             <li className="nav-item mx-2"><Link className="nav-link text-white" to="/chocolates">🍫 Chocolates</Link></li>
-            <li className="nav-item mx-2"><Link className="nav-link text-white" to="/aboutus">ℹ️ About</Link></li>
-            <li className="nav-item mx-2"><Link className="nav-link text-white" to="/contactus">📞 Contact</Link></li>
+            {/* <li className="nav-item mx-2"><Link className="nav-link text-white" to="/aboutus">ℹ️ About</Link></li> */}
+            <li className="nav-item mx-2">
+              <Link
+                className="nav-link text-white"
+                to="/"
+                onClick={handleContactClick}
+              >
+                📞 Contact
+              </Link>
+            </li>
+              
+            
+
           </ul>
         </div>
       </nav>
 
-      <div className="container body-section pt-5">
+      <div className="container-fluid body-section pt-3">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/veg" element={<Veg />} />
@@ -107,13 +133,15 @@ function App() {
           <Route path="/chocolates" element={<Chocolates />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/cart" element={<Cart />} />
-          <Route path="/aboutus" element={<AboutUs />} />
-          <Route path="/contactus" element={<ContactUs />} />
+          {/* <Route path="/aboutus" element={<AboutUs />} /> */}
+          {/* <Route path="/contactus" element={<ContactUs />} /> */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/*" element={<NotFound />} />
         </Routes>
       </div>
+      {/* 🔹 Footer */}
+      <Footer />
    </>
   );
 }

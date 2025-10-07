@@ -1,0 +1,11 @@
+/* Footer Links Hover */
+footer a.text-light:hover {
+  color: #ffeb3b !important; /* yellow */
+  transition: color 0.3s ease-in-out;
+}
+
+/* Optional: Social icons hover */
+footer .d-flex a.text-light:hover {
+  color: #ffeb3b !important;
+}
+

@@ -1,20 +1,20 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FaShoppingCart } from "react-icons/fa";
-import { addToCart, reduceQty, increaseQty } from "./store"; // ✅ include qty actions
+import { FaShoppingCart, FaStar } from "react-icons/fa";
+import { addToCart, increaseQty, reduceQty } from "./store";
 import "./stylesheets/chocolatesSection.css";
 import { Slide, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function Chocolates() {
   const chocolateItems = useSelector((state) => state.products.chocolates);
-  const cartItems = useSelector((state) => state.cart); // ✅ cart state
+  const cartItems = useSelector((state) => state.cart);
   const dispatch = useDispatch();
 
-  const itemsPerPage = 8;
+  const itemsPerPage = 6;
   const totalPages = Math.ceil(chocolateItems.length / itemsPerPage);
-
   const [currentPage, setCurrentPage] = useState(1);
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const slicedItems = chocolateItems.slice(indexOfFirstItem, indexOfLastItem);
@@ -29,7 +29,7 @@ function Chocolates() {
     </button>
   ));
 
-  // ✅ helper to check if item already in cart
+  // ✅ helper to find cart item
   const getCartItem = (id) => cartItems.find((item) => item.id === id);
 
   return (
@@ -52,14 +52,15 @@ function Chocolates() {
 
       <div className="container chocolates-section py-5">
         <h2 className="text-center mb-5 section-title">🍫 Chocolates & Sweets</h2>
+
         <div className="row">
           {slicedItems.map((product) => {
             const cartItem = getCartItem(product.id);
 
             return (
-              <div key={product.id} className="col-md-3 col-sm-6 mb-4">
-                <div className="card product-card h-100 shadow-sm">
-                  {/* Image */}
+              <div key={product.id} className="col-md-2 col-sm-6 mb-4">
+                <div className="card product-card h-100 shadow-sm border">
+                  {/* 🖼️ Image */}
                   <div className="img-container">
                     <img
                       src={product.imageUrl}
@@ -68,14 +69,29 @@ function Chocolates() {
                     />
                   </div>
 
-                  {/* Content */}
-                  <div className="card-body d-flex flex-column text-center">
+                  {/* 📦 Card Body */}
+                  <div className="card-body d-flex flex-column text-center chocolate-card">
                     <h5 className="card-title">{product.name}</h5>
+
+                    {/* 💰 Price */}
                     <p className="card-text text-muted">
                       <span className="cart-price">₹ {product.price}</span> / {product.unit}
                     </p>
 
-                    {/* ✅ same toggle logic */}
+                    {/* ⭐ Ratings */}
+                    <div className="star-rating mb-2 d-flex justify-content-center">
+                      <span className="d-flex align-items-center">
+                        <small className="text-muted me-2">{product.rating}</small>
+                        {[...Array(5)].map((_, i) => (
+                          <FaStar
+                            key={i}
+                            color={i < Math.round(product.rating) ? "#ffc107" : "#e4e5e9"}
+                          />
+                        ))}
+                      </span>
+                    </div>
+
+                    {/* 🛒 Add / Quantity Controls */}
                     {!cartItem ? (
                       <button
                         className="btn btn-chocolate mt-auto cart-btn"
@@ -119,20 +135,24 @@ function Chocolates() {
           })}
         </div>
 
-        {/* Pagination Buttons */}
+        {/* 📄 Pagination */}
         <div className="pagination-buttons text-center mt-4">
           <button
+            className="pagination-btn"
             onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            prev
-          </button>{" "}
-          {paginationButtons}{" "}
+            Prev
+          </button>
+
+          {paginationButtons}
+
           <button
+            className="pagination-btn"
             onClick={() => setCurrentPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            next
+            Next
           </button>
         </div>
       </div>

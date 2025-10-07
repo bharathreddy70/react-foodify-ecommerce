@@ -32,8 +32,10 @@
 
 /* Push main content below fixed navbar */
 .body-section {
-  margin-top: 80px; /* adjust if navbar taller */
+
+  margin-top: 105px; /* adjust if navbar taller */
   padding-bottom: 40px; /* spacing at bottom */
+  
 }
 
 /* Section Spacing Utility */

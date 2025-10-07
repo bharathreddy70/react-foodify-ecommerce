@@ -1,0 +1,67 @@
+/* Parallax for hero & stats */
+.parallax {
+  background: url('/images/hero-bg.jpg') center/cover no-repeat fixed;
+  position: relative;
+}
+
+.parallax-light {
+  background: url('/images/stats-bg.jpg') center/cover no-repeat fixed;
+}
+
+/* Hero Section */
+.hero {
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero .overlay {
+  background: rgba(0, 0, 0, 0.55);
+  padding: 50px;
+  border-radius: 12px;
+  text-align: center;
+  color: #fff;
+}
+
+/* Mission & Vision cards */
+.mission-vision .card {
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.mission-vision .card:hover {
+  transform: translateY(-15px) scale(1.05);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+/* Stats Cards */
+.stat-card {
+  transition: transform 0.4s ease;
+}
+.stat-card:hover {
+  transform: scale(1.1);
+}
+
+/* Team Card Flip */
+.team-card {
+  perspective: 1000px;
+}
+.team-card img {
+  transition: transform 0.6s ease;
+}
+.team-card:hover img {
+  transform: rotateY(180deg);
+}
+
+/* CTA Section */
+.cta {
+  border-radius: 12px;
+  margin: 60px 20px;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #ffcc80, #ff8a65);
+  text-align: center;
+  color: #fff;
+}
+.cta button:hover {
+  transform: scale(1.1);
+  background: #ffe0b2;
+}
